@@ -1,7 +1,0 @@
-node_modules/
-.env
-.DS_Store
-.expo/
-android/
-ios/
-npm-debug.log
