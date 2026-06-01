@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drag Counter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      text-align: center;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .count {
+      font-size: 64px;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+    .track {
+      width: 200px;
+      height: 60px;
+      background: #eee;
+      border-radius: 30px;
+      position: relative;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn {
+      width: 60px;
+      height: 60px;
+      background: #007bff;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      cursor: grab;
+      touch-action: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .btn:active {
+      cursor: grabbing;
+    }
+    svg {
+      width: 24px;
+      height: 24px;
+      stroke: white;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="count" id="countDisplay">0</div>
+    <div class="track">
+      <div class="btn" id="dragBtn">
+        <svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </div>
+    </div>
+    <p style="color: #666; margin-top: 20px;">Drag left or right</p>
+  </div>
+
+  <script>
+    const btn = document.getElementById('dragBtn');
+    const countDisplay = document.getElementById('countDisplay');
+    
+    let count = 0;
+    let isDragging = false;
+    let startX = 0;
+    const threshold = 50;
+
+    // Start drag
+    btn.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      btn.setPointerCapture(e.pointerId);
+      btn.style.transition = 'none'; // remove animation while dragging
+    });
+
+    // Handle movement
+    btn.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+
+      let currentX = e.clientX;
+      let deltaX = currentX - startX;
+
+      // Move the button visually along the track
+      let visualMove = Math.max(-70, Math.min(deltaX, 70));
+      btn.style.transform = `translateX(${visualMove}px)`;
+
+      // Update count based on threshold
+      if (deltaX > threshold) {
+        count++;
+        countDisplay.textContent = count;
+        startX = currentX; // Reset base line
+      } else if (deltaX < -threshold) {
+        count--;
+        countDisplay.textContent = count;
+        startX = currentX; // Reset base line
+      }
+    });
+
+    // Reset position when let go
+    const resetBtn = (e) => {
+      isDragging = false;
+      btn.style.transition = 'transform 0.2s';
+      btn.style.transform = 'translateX(0px)';
+      btn.releasePointerCapture(e.pointerId);
+    };
+
+    btn.addEventListener('pointerup', resetBtn);
+    btn.addEventListener('pointercancel', resetBtn);
+  </script>
+</body>
+</html>
