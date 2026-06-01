@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag Counter App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        .count-display {
+            font-size: 64px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            user-select: none;
+        }
+
+        .drag-container {
+            position: relative;
+            height: 80px;
+            background: #e4e6eb;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .drag-btn {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #0866ff;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            /* Touch action none prevents the screen from scrolling while dragging on mobile */
+            touch-action: none; 
+            z-index: 2;
+        }
+
+        .drag-btn:active {
+            cursor: grabbing;
+        }
+
+        /* SVG Plus Icon */
+        .drag-btn svg {
+            width: 28px;
+            height: 28px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .helper-text {
+            color: #65676b;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="count-display" id="count">0</div>
+        
+        <div class="drag-container" id="track">
+            <div class="drag-btn" id="btn">
+                <svg viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="helper-text">Drag left or right</div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('btn');
+        const countDisplay = document.getElementById('count');
+        const track = document.getElementById('track');
+
+        let count = 0;
+        let isDragging = false;
+        let startX = 0;
+        
+        // Distance required to trigger a count change
+        const threshold = 60; 
+        
+        // Limits for how far the button can visually move
+        const maxDrag = (track.offsetWidth / 2) - (btn.offsetWidth / 2) - 10;
+
+        btn.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            btn.style.transition = 'none'; // Remove snap animation while actively dragging
+            btn.setPointerCapture(e.pointerId); // Keep tracking even if cursor slips off button
+        });
+
+        btn.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+
+            // Calculate how far the user has dragged
+            let deltaX = e.clientX - startX;
+
+            // Visually move the button (constrained by the track width)
+            let visualMove = Math.max(-maxDrag, Math.min(deltaX, maxDrag));
+            btn.style.transform = `translateX(${visualMove}px)`;
+
+            // Logic to update the count
+            if (deltaX >= threshold) {
+                count++;
+                countDisplay.textContent = count;
+                startX = e.clientX; // Reset baseline so they can keep dragging to increment more
+            } else if (deltaX <= -threshold) {
+                count--;
+                countDisplay.textContent = count;
+                startX = e.clientX; // Reset baseline
+            }
+        });
+
+        const resetButton = (e) => {
+            isDragging = false;
+            // Snap the button back to the center smoothly
+            btn.style.transition = 'transform 0.3s ease';
+            btn.style.transform = `translateX(0px)`;
+            btn.releasePointerCapture(e.pointerId);
+        };
+
+        // Handle both mouse/touch release and edge-case cancellations
+        btn.addEventListener('pointerup', resetButton);
+        btn.addEventListener('pointercancel', resetButton);
+    </script>
+</body>
+</html>
