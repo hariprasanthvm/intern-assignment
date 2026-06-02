@@ -36,7 +36,7 @@ export default function DashboardScreen({ navigation }) {
         <View style={styles.cardMediaMock} />
         <Text style={styles.cardContentText}>
           This modular block matches the precise spatial specs layout structure outlined inside Google's structural system interface specifications.
-        </</Text>
+        </Text>
       </View>
 
       {/* Task 11: Reminder Engine Execution */}
